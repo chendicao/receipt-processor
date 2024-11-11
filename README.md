@@ -27,8 +27,8 @@ This project is a Go-based service to process receipts, assign a unique identifi
    Clone the repository using Git or download the source code:
 
    ```bash
-   git clone https://github.com/fetch-rewards/receipt-processor-challenge.git
-   cd receipt-processor-challenge
+   git clone https://github.com/chendicao/receipt-processor.git
+   cd receipt-processor
    ```
 
 2. **Install Dependencies**
@@ -53,7 +53,7 @@ To start the service, run the following command in the project directory:
 ./receipt-processor
 ```
 
-The server will start on `http://localhost:8080` by default.
+The server will start on `http://localhost:8000` by default.
 
 ## API Endpoints
 
@@ -113,7 +113,7 @@ You can test the API using `curl` commands or tools like [Postman](https://www.p
 1. **Submit a Receipt**:
 
    ```bash
-   curl -X POST http://localhost:8080/receipts/process    -H "Content-Type: application/json"    -d '{
+   curl -X POST http://localhost:8000/receipts/process    -H "Content-Type: application/json"    -d '{
          "retailer": "Target",
          "purchaseDate": "2024-10-25",
          "purchaseTime": "13:13",
@@ -129,26 +129,25 @@ You can test the API using `curl` commands or tools like [Postman](https://www.p
 
    ```json
    {
-     "id": "12345"
+     "id": "cc2cb204-eacb-4689-a58e-6f4f41945299"
    }
    ```
 
 2. **Retrieve Points for a Receipt**:
 
-   Assuming the receipt ID is `12345`:
+   Assuming the receipt ID is `cc2cb204-eacb-4689-a58e-6f4f41945299`:
 
    ```bash
-   curl -X GET http://localhost:8080/receipts/12345/points
+   curl -X GET http://localhost:8000/receipts/cc2cb204-eacb-4689-a58e-6f4f41945299/points
    ```
 
    **Expected Response**:
 
    ```json
    {
-     "points": 150
+     "points": 47
    }
    ```
 
-## License
-
-This project is for educational and demonstration purposes.
+ 
+ 
