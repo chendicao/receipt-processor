@@ -22,7 +22,12 @@ type Points struct {
 
 func ProcessReceipts(w http.ResponseWriter, r *http.Request) {
 	var receipt models.Receipt
-	_ = json.NewDecoder(r.Body).Decode(&receipt)
+	// Attempt to decode the JSON body
+	err := json.NewDecoder(r.Body).Decode(&receipt)
+	if err != nil {
+		http.Error(w, "The receipt is invalid", http.StatusBadRequest)
+		return
+	}
 
 	// Generate a UUID for the receipt ID
 	receiptID := uuid.New().String()
@@ -42,11 +47,16 @@ func GetReceiptPoints(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the receipt from the store
 	receipt, ok := receiptStore[id]
 	if !ok {
-		http.Error(w, "Receipt not found", http.StatusNotFound)
+		http.Error(w, "No receipt found for that id", http.StatusNotFound)
 		return
 	}
 
 	// Calculate points and respond with just the points
 	points := service.CalculatePoints(&receipt)
+	if points < 0 {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(w).Encode(Points{Points: points})
 }

@@ -33,7 +33,21 @@ This project is a Go-based service to process receipts, assign a unique identifi
 
 2. **Install Dependencies**
 
-   No external dependencies are required for this project, as it uses Go’s standard library.
+   The project uses the following dependencies:
+   - **Gorilla Mux**: A powerful URL router and dispatcher for Go.
+   - **UUID**: A package to generate UUIDs.
+
+   Install the dependencies by running:
+
+   ```bash
+   go mod tidy
+   ```
+
+   This will fetch and install the required dependencies, including:
+   ```bash
+   require github.com/gorilla/mux v1.8.1
+   require github.com/google/uuid v1.6.0
+   ```
 
 3. **Build the Project**
 
@@ -43,7 +57,7 @@ This project is a Go-based service to process receipts, assign a unique identifi
    go build -o receipt-processor
    ```
 
-This command will generate an executable called `receipt-processor` in the project directory.
+   This command will generate an executable called `receipt-processor` in the project directory.
 
 ## Running the Service
 
@@ -65,6 +79,8 @@ Accepts a JSON payload of receipt data, generates a unique receipt ID, and retur
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 
+Receipt ID Generation: A unique identifier (UUID) is generated for each receipt using the code `receiptID := uuid.New().String()`. This ensures that each receipt has a distinct ID.
+
 **Request Payload** (Example):
 
 ```json
@@ -84,7 +100,34 @@ Accepts a JSON payload of receipt data, generates a unique receipt ID, and retur
 
 ```json
 {
-  "id": "12345"
+  "id": "cc2cb204-eacb-4689-a58e-6f4f41945299"
+}
+```
+
+**Invalid Receipt Example**:
+
+If the receipt data is invalid (e.g., missing required fields or incorrect price format), you will receive an error.
+
+**Request Payload (Invalid)**:
+
+```json
+{
+  "retailer": "Target",
+  "purchaseDate": "2024-10-25",
+  "purchaseTime": "13:13",
+  "items": [
+    { "shortDescription": "Pepsi", "price": "1.2" },  // Invalid price format
+    { "shortDescription": "Bread", "price": "invalid" }  // Invalid price
+  ],
+  "total": 3.75
+}
+```
+
+**Expected Response (400 Bad Request)**:
+
+```json
+{
+  "error": "Invalid receipt"
 }
 ```
 
@@ -101,6 +144,24 @@ Retrieves the points for the given receipt ID.
 ```json
 {
   "points": 150
+}
+```
+
+**Receipt Not Found Example**:
+
+If the receipt ID does not exist or is invalid, you will receive a `404 Not Found` error.
+
+**Request (Non-existent Receipt ID)**:
+
+```bash
+curl -X GET http://localhost:8000/receipts/invalid-receipt-id/points
+```
+
+**Expected Response (404 Not Found)**:
+
+```json
+{
+  "error": "No receipt found for that id"
 }
 ```
 
@@ -149,5 +210,40 @@ You can test the API using `curl` commands or tools like [Postman](https://www.p
    }
    ```
 
- 
- 
+3. **Invalid Receipt Example (400 Bad Request)**:
+
+   ```bash
+   curl -X POST http://localhost:8000/receipts/process    -H "Content-Type: application/json"    -d '{
+         "retailer": "Target",
+         "purchaseDate": "2024-10-25",
+         "purchaseTime": "13:13",
+         "items": [
+           { "shortDescription": "Pepsi", "price": "1.2" },
+           { "shortDescription": "Bread", "price": "invalid" }
+         ],
+         "total": 3.75
+       }'
+   ```
+
+   **Expected Response**:
+
+   ```json
+   {
+     "error": "Invalid receipt"
+   }
+   ```
+
+4. **Receipt Not Found Example (404 Not Found)**:
+
+   ```bash
+   curl -X GET http://localhost:8000/receipts/invalid-receipt-id/points
+   ```
+
+   **Expected Response**:
+
+   ```json
+   {
+     "error": "No receipt found for that id"
+   }
+   ```
+
