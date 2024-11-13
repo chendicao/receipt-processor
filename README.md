@@ -31,22 +31,23 @@ This project is a Go-based service to process receipts, assign a unique identifi
    cd receipt-processor
    ```
 
-2. **Install Dependencies**
+2. **Initialize Go Modules**
 
+    Ensure that the Go modules are initialized (this should already be done if you're using Go 1.16 or higher). If the `go.mod` file is not already present, you can initialize it with:
+
+   ```bash
+   go mod init github.com/chendicao/receipt-processor
+   ```
+3. **Install Dependencies**
    The project uses the following dependencies:
    - **Gorilla Mux**: A powerful URL router and dispatcher for Go.
    - **UUID**: A package to generate UUIDs.
+   - **Go Playground Validator**: For data validation.
 
-   Install the dependencies by running:
-
+   The `go.mod` file will automatically track these dependencies.
+4. **Verify Dependencies Installation**
    ```bash
-   go mod tidy
-   ```
-
-   This will fetch and install the required dependencies, including:
-   ```bash
-   require github.com/gorilla/mux v1.8.1
-   require github.com/google/uuid v1.6.0
+   go run main.go
    ```
 
 3. **Build the Project**
@@ -58,6 +59,13 @@ This project is a Go-based service to process receipts, assign a unique identifi
    ```
 
    This command will generate an executable called `receipt-processor` in the project directory.
+
+   Alternatively, you can run the service directly without building the executable:
+
+   ```bash
+   go run main.go
+   ```
+
 
 ## Running the Service
 
