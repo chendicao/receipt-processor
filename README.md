@@ -165,13 +165,22 @@ curl -X GET http://localhost:8000/receipts/invalid-receipt-id/points
 }
 ```
 
-## Testing
+## Schema Validation
 
-You can test the API using `curl` commands or tools like [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/).
+The service uses **go-playground/validator** to validate the structure of the receipt data.
+
+- **Required Fields**: All required fields must be provided in the receipt JSON (e.g., `retailer`, `purchaseDate`, `items`).
+- **Field Formats**:
+  - `purchaseDate`: Must follow the `YYYY-MM-DD` format.
+  - `purchaseTime`: Must follow the `HH:MM` format.
+  - `price`: Must be a valid floating-point number (e.g., `1.25`).
+  - `total`: Must be a valid floating-point number (e.g., `3.75`).
+  
+If any of the fields are missing or incorrectly formatted, the service will return a `400 Bad Request` with a detailed error message indicating which field caused the validation failure.
 
 ### Example Test Cases
 
-1. **Submit a Receipt**:
+1. **Submit a Valid Receipt**:
 
    ```bash
    curl -X POST http://localhost:8000/receipts/process    -H "Content-Type: application/json"    -d '{
@@ -184,15 +193,16 @@ You can test the API using `curl` commands or tools like [Postman](https://www.p
          ],
          "total": 3.75
        }'
-   ```
+    ```
 
-   **Expected Response**:
+    **Expected Response**:
 
-   ```json
-   {
-     "id": "cc2cb204-eacb-4689-a58e-6f4f41945299"
-   }
-   ```
+      ```json
+      {
+        "id": "cc2cb204-eacb-4689-a58e-6f4f41945299"
+      }
+      ```
+ 
 
 2. **Retrieve Points for a Receipt**:
 
@@ -228,9 +238,9 @@ You can test the API using `curl` commands or tools like [Postman](https://www.p
    **Expected Response**:
 
    ```json
-   {
-     "error": "Invalid receipt"
-   }
+    {
+      "error": "Invalid receipt structure: Key: 'Item.Price' Error:Field validation for 'Price' failed on the 'required' tag"
+    }
    ```
 
 4. **Receipt Not Found Example (404 Not Found)**:

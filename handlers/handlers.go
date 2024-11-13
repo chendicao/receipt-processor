@@ -6,11 +6,15 @@ import (
 
 	"github.com/chendicao/receipt-processor/models"
 	"github.com/chendicao/receipt-processor/service"
-	"github.com/google/uuid" // Import the UUID package
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
-var receiptStore = make(map[string]models.Receipt)
+var (
+	receiptStore = make(map[string]models.Receipt)
+	validate     = validator.New()
+)
 
 type ReceiptID struct {
 	ID string `json:"id"`
@@ -22,10 +26,15 @@ type Points struct {
 
 func ProcessReceipts(w http.ResponseWriter, r *http.Request) {
 	var receipt models.Receipt
-	// Attempt to decode the JSON body
 	err := json.NewDecoder(r.Body).Decode(&receipt)
 	if err != nil {
 		http.Error(w, "The receipt is invalid", http.StatusBadRequest)
+		return
+	}
+
+	// Validate receipt structure
+	if err := validate.Struct(receipt); err != nil {
+		http.Error(w, "Invalid receipt structure: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -37,6 +46,7 @@ func ProcessReceipts(w http.ResponseWriter, r *http.Request) {
 
 	// Respond with only the generated ID
 	response := ReceiptID{ID: receiptID}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -58,5 +68,6 @@ func GetReceiptPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(Points{Points: points})
 }
