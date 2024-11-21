@@ -4,6 +4,7 @@ import (
 	"math"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/chendicao/receipt-processor/models"
 )
@@ -12,7 +13,11 @@ func CalculatePoints(receipt *models.Receipt) int {
 	points := 0
 
 	// Rule 1: One point for every alphanumeric character in the retailer name
-	points += len(strings.ReplaceAll(receipt.Retailer, " ", ""))
+	for _, char := range receipt.Retailer {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) {
+			points += 1
+		}
+	}
 
 	// Rule 2: 50 points if the total is a round dollar amount with no cents
 	if receipt.Total == float64(int(receipt.Total)) {
@@ -29,6 +34,7 @@ func CalculatePoints(receipt *models.Receipt) int {
 
 	// Rule 5: If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer
 	for _, item := range receipt.Items {
+		// Directly trimming and checking length for better efficiency
 		trimmedLength := len(strings.TrimSpace(item.ShortDescription))
 		if trimmedLength%3 == 0 {
 			additionalPoints := int(math.Ceil(item.Price * 0.2))
@@ -37,14 +43,14 @@ func CalculatePoints(receipt *models.Receipt) int {
 	}
 
 	// Rule 6: 6 points if the day in the purchase date is odd
-	purchaseDay, _ := time.Parse("2006-01-02", receipt.PurchaseDate)
-	if purchaseDay.Day()%2 != 0 {
+	purchaseDay, err := time.Parse("2006-01-02", receipt.PurchaseDate)
+	if err == nil && purchaseDay.Day()%2 != 0 {
 		points += 6
 	}
 
 	// Rule 7: 10 points if the time of purchase is after 2:00pm and before 4:00pm
-	purchaseTime, _ := time.Parse("15:04", receipt.PurchaseTime)
-	if purchaseTime.Hour() > 14 && purchaseTime.Hour() < 16 {
+	purchaseTime, err := time.Parse("15:04", receipt.PurchaseTime)
+	if err == nil && purchaseTime.Hour() > 14 && purchaseTime.Hour() < 16 {
 		points += 10
 	}
 

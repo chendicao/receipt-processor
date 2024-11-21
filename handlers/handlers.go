@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/chendicao/receipt-processor/models"
-	"github.com/chendicao/receipt-processor/service"
+	"github.com/chendicao/receipt-processor/service" // Import the utils package
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -24,6 +24,7 @@ type Points struct {
 	Points int `json:"points"`
 }
 
+// ProcessReceipts handles receipt processing
 func ProcessReceipts(w http.ResponseWriter, r *http.Request) {
 	var receipt models.Receipt
 	err := json.NewDecoder(r.Body).Decode(&receipt)
@@ -50,6 +51,7 @@ func ProcessReceipts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// GetReceiptPoints handles fetching receipt points
 func GetReceiptPoints(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
