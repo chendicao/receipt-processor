@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/rs/cors" // Add the missing CORS import
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/redis"
 )
