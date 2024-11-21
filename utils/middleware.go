@@ -1,41 +1,26 @@
 package utils
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/rs/cors" // Add the missing CORS import
 	"github.com/ulule/limiter/v3"
-	"github.com/ulule/limiter/v3/drivers/store/redis"
+	"github.com/ulule/limiter/v3/drivers/store/memory" // Use the memory store instead of redis
 )
 
 var limiterInstance *limiter.Limiter
-var redisClient *redis.Client
 
-// Initialize Redis client and rate limiter
+// Initialize in-memory store and rate limiter
 func init() {
-	// Create Redis client
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis server address
-		Password: "",               // No password set
-		DB:       0,                // Default DB
-	})
-	// Ensure Redis is reachable
-	_, err := redisClient.Ping(context.Background()).Result()
-	if err != nil {
-		fmt.Printf("Failed to connect to Redis: %v\n", err)
-		return
-	}
+	// Use the memory store for rate limiting
+	store := memory.NewStore() // In-memory store
 
-	// Use Redis as the store for rate limiting
-	store := redis.NewStore(redisClient)
 	rate := limiter.Rate{
 		Period: 1 * time.Second,
 		Limit:  10, // Max 10 requests per second
 	}
+
 	limiterInstance = limiter.New(store, rate)
 }
 
