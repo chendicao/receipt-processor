@@ -2,34 +2,40 @@ package handlers
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/chendicao/receipt-processor/database"
 	"github.com/chendicao/receipt-processor/models"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
 // Mock database initialization
-func setupMockDB() (*sqlmock.Sqlmock, func()) {
+func setupMockDB() (sqlmock.Sqlmock, *sql.DB, func()) {
 	// Open a mock database
 	db, mock, _ := sqlmock.New()
 
-	// Mock DB connection
 	// This function will clean up after the test
-	return &mock, func() { db.Close() }
+	return mock, db, func() { db.Close() }
 }
 
 func TestProcessReceipts(t *testing.T) {
 	// Setup mock database
-	mockDB, cleanup := setupMockDB()
+	mockDB, db, cleanup := setupMockDB()
 	defer cleanup()
 
+	// Assign the mock database to the global DB variable
+	database.DB = db
+
 	// Mock expected database behavior
-	mockDB.ExpectExec("INSERT INTO receipts").WillReturnResult(sqlmock.NewResult(1, 1))
+	mockDB.ExpectExec("INSERT INTO receipts").WithArgs(
+		"Test Retailer", "2024-11-22", "12:34", 100.00,
+	).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	// Create a new request to pass into the handler
 	receipt := models.Receipt{
@@ -71,11 +77,17 @@ func TestProcessReceipts(t *testing.T) {
 
 func TestGetReceiptPoints(t *testing.T) {
 	// Setup mock database
-	mockDB, cleanup := setupMockDB()
+	mockDB, db, cleanup := setupMockDB()
 	defer cleanup()
 
+	// Assign the mock database to the global DB variable
+	database.DB = db
+
 	// Mock expected database behavior
-	mockDB.ExpectQuery("SELECT").WillReturnRows(sqlmock.NewRows([]string{"retailer", "purchase_date", "purchase_time", "total"}).AddRow("Test Retailer", "2024-11-22", "12:34", 100.00))
+	mockDB.ExpectQuery("SELECT retailer, purchase_date, purchase_time, total").
+		WithArgs("test-id").
+		WillReturnRows(sqlmock.NewRows([]string{"retailer", "purchase_date", "purchase_time", "total"}).
+			AddRow("Test Retailer", "2024-11-22", "12:34", 100.00))
 
 	// Create a new request to pass into the handler
 	req, err := http.NewRequest("GET", "/receipts/test-id/points", nil)

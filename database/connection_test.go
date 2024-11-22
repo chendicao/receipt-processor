@@ -1,21 +1,24 @@
 package database
 
 import (
-	"os"
 	"testing"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConnect(t *testing.T) {
 	// Set environment variables for testing (you may use a testing .env file or mock them)
-	os.Setenv("DB_USER", "your_user")
-	os.Setenv("DB_PASSWORD", "your_password")
-	os.Setenv("DB_NAME", "test_db")
-
+	// os.Setenv("DB_USER", "your_user")
+	// os.Setenv("DB_PASSWORD", "your_password")
+	// os.Setenv("DB_NAME", "test_db")
+	err := godotenv.Load(".env")
+	if err != nil {
+		t.Fatalf("Error loading .env file")
+	}
 	// Connect to the database
-	err := Connect()
+	err = Connect()
 	if err != nil {
 		t.Fatalf("Failed to connect to the database: %v", err)
 	}
@@ -35,12 +38,15 @@ func TestConnect(t *testing.T) {
 
 func TestRunMigrations(t *testing.T) {
 	// Set environment variables for testing
-	os.Setenv("DB_USER", "your_user")
-	os.Setenv("DB_PASSWORD", "your_password")
-	os.Setenv("DB_NAME", "test_db")
-
+	// os.Setenv("DB_USER", "your_user")
+	// os.Setenv("DB_PASSWORD", "your_password")
+	// os.Setenv("DB_NAME", "test_db")
+	err := godotenv.Load(".env")
+	if err != nil {
+		t.Fatalf("Error loading .env file")
+	}
 	// Connect to the database
-	err := Connect()
+	err = Connect()
 	if err != nil {
 		t.Fatalf("Failed to connect to the database: %v", err)
 	}
