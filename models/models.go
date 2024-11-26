@@ -11,4 +11,6 @@ type Receipt struct {
 	PurchaseTime string  `json:"purchaseTime" validate:"required,datetime=15:04"`
 	Items        []Item  `json:"items" validate:"required,dive,required"`
 	Total        float64 `json:"total" validate:"required"`
+	UserID       string  `json:"userID" validate:"required"`
+	Points       int     `json:"-"`
 }
