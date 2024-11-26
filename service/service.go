@@ -4,7 +4,8 @@ import (
 	"math"
 	"strings"
 	"time"
-
+	"unicode"
+	
 	"github.com/chendicao/receipt-processor/models"
 )
 
@@ -12,8 +13,11 @@ func CalculatePoints(receipt *models.Receipt) int {
 	points := 0
 
 	// Rule 1: One point for every alphanumeric character in the retailer name
-	points += len(strings.ReplaceAll(receipt.Retailer, " ", ""))
-
+	for _, char := range receipt.Retailer {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) {
+			points += 1
+		}
+	}
 	// Rule 2: 50 points if the total is a round dollar amount with no cents
 	if receipt.Total == float64(int(receipt.Total)) {
 		points += 50
